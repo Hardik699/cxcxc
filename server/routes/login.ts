@@ -173,16 +173,34 @@ export const handleLogin: RequestHandler = async (req, res) => {
   } catch (error) {
     console.error("Login error:", error);
     
-    // Log server error
-    await createLoginLog({
-      username: req.body.username || "unknown",
-      ipAddress: ip,
-      userAgent,
-      loginTime: new Date(),
-      status: "failed",
-      failureReason: "Server error during login",
+    // More detailed error logging
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("Login error details:", {
+      message: errorMessage,
+      stack: error instanceof Error ? error.stack : "No stack trace",
+      username: req.body.username,
+      ip: ip
     });
     
-    res.status(500).json({ success: false, message: "Server error during login" } as LoginResponse);
+    // Log server error
+    try {
+      await createLoginLog({
+        username: req.body.username || "unknown",
+        ipAddress: ip,
+        userAgent,
+        loginTime: new Date(),
+        status: "failed",
+        failureReason: `Server error: ${errorMessage}`,
+      });
+    } catch (logError) {
+      console.error("Failed to log login error:", logError);
+    }
+    
+    res.status(500).json({ 
+      success: false, 
+      message: "Server error during login",
+      // Include error details in development
+      ...(process.env.NODE_ENV === "development" && { error: errorMessage })
+    } as LoginResponse);
   }
 };
