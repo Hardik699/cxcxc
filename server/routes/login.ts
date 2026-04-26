@@ -24,9 +24,26 @@ const MAX_ATTEMPTS = 10;
 const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
 
 export const handleLogin: RequestHandler = async (req, res) => {
+  // Enhanced database connection check
   const dbStatus = getConnectionStatus();
+  console.log("🔍 Login attempt - DB Status:", dbStatus);
+  
   if (dbStatus !== "connected") {
-    return res.status(503).json({ success: false, message: "Database not connected. Please try again later." } as LoginResponse);
+    console.error("❌ Database not connected during login attempt");
+    return res.status(503).json({ 
+      success: false, 
+      message: "Database not connected. Please try again later.",
+      debug: process.env.NODE_ENV === "development" ? { dbStatus } : undefined
+    } as LoginResponse);
+  }
+
+  // Validate request body exists
+  if (!req.body) {
+    console.error("❌ No request body in login attempt");
+    return res.status(400).json({ 
+      success: false, 
+      message: "Invalid request - no data provided" 
+    } as LoginResponse);
   }
 
   // Get IP address - handle various proxy scenarios

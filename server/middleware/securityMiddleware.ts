@@ -37,11 +37,11 @@ export function securityHeaders(_req: Request, res: Response, next: NextFunction
   res.setHeader("X-Frame-Options", "DENY");
   res.setHeader("X-XSS-Protection", "1; mode=block");
   
-  // Prevent clickjacking - Allow Google Fonts
-  res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'");
+  // Prevent clickjacking - Allow Google Fonts and external resources
+  res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src 'self' https:; img-src 'self' data: https:; style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com");
   
-  // Disable content type sniffing
-  res.setHeader("Content-Security-Policy-Report-Only", "default-src 'self'");
+  // Remove the report-only CSP that conflicts
+  // res.setHeader("Content-Security-Policy-Report-Only", "default-src 'self'");
   
   // HSTS (HTTP Strict Transport Security)
   res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");

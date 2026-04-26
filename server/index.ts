@@ -240,6 +240,10 @@ app.use(
     res.json({ message: ping });
   });
 
+  // Debug endpoint for deployment troubleshooting
+  const { handleDebugStatus } = await import("./routes/debug");
+  app.get("/api/debug", handleDebugStatus);
+
   app.get("/api/demo", handleDemo);
   // Provide a GET route for demo population for convenience during local testing
   app.get("/api/demo/populate-sample-data", handlePopulateSampleData);
